@@ -2029,6 +2029,7 @@ dependencies = [
  "librespot-protocol",
  "log 0.4.14",
  "notify-rust",
+ "pancurses",
  "platform-dirs",
  "rand 0.8.3",
  "regex",
