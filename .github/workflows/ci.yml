@@ -13,4 +13,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: cargo build
-        run: cargo build --no-default-features --features rodio_backend,cursive/pancurses-backend --release
+        run: cargo build --verbose --no-default-features --features rodio_backend,cursive/pancurses-backend --release
