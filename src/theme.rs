@@ -2,6 +2,7 @@ use cursive::theme::BaseColor::*;
 use cursive::theme::Color::*;
 use cursive::theme::PaletteColor::*;
 use cursive::theme::*;
+use log::warn;
 
 use crate::config::ConfigTheme;
 
@@ -10,8 +11,14 @@ macro_rules! load_color {
         $theme
             .as_ref()
             .and_then(|t| t.$member.clone())
-            .map(|c| Color::parse(c.as_ref()).expect(&format!("Failed to parse color \"{}\"", c)))
-            .unwrap_or($default)
+            .and_then(|c| Color::parse(c.as_ref()))
+            .unwrap_or_else(|| {
+                warn!(
+                    "Failed to parse color in \"{}\", falling back to default",
+                    stringify!($member)
+                );
+                $default
+            })
     };
 }
 

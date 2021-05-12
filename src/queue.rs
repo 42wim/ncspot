@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::sync::{Arc, RwLock};
 
+use log::{debug, error, info};
 #[cfg(feature = "notify")]
 use notify_rust::Notification;
 
@@ -102,10 +103,8 @@ impl Queue {
     }
 
     pub fn get_current(&self) -> Option<Playable> {
-        match self.get_current_index() {
-            Some(index) => Some(self.queue.read().unwrap()[index].clone()),
-            None => None,
-        }
+        self.get_current_index()
+            .map(|index| self.queue.read().unwrap()[index].clone())
     }
 
     pub fn get_current_index(&self) -> Option<usize> {

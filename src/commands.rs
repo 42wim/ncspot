@@ -25,6 +25,7 @@ use cursive::event::{Event, Key};
 use cursive::traits::View;
 use cursive::views::Dialog;
 use cursive::Cursive;
+use log::{debug, error, info};
 use std::cell::RefCell;
 
 pub enum CommandResult {
@@ -375,8 +376,8 @@ impl CommandManager {
 
         kb.insert("r".into(), Command::Repeat(None));
         kb.insert("z".into(), Command::Shuffle(None));
-        kb.insert("x".into(), Command::Share(TargetMode::Current));
-        kb.insert("Shift+x".into(), Command::Share(TargetMode::Selected));
+        kb.insert("x".into(), Command::Share(TargetMode::Selected));
+        kb.insert("Shift+x".into(), Command::Share(TargetMode::Current));
 
         kb.insert("F1".into(), Command::Focus("queue".into()));
         kb.insert("F2".into(), Command::Focus("search".into()));

@@ -1,39 +1,9 @@
-extern crate clap;
-extern crate crossbeam_channel;
 #[macro_use]
 extern crate cursive;
-#[cfg(feature = "share_clipboard")]
-extern crate clipboard;
-extern crate failure;
-extern crate futures;
 #[macro_use]
 extern crate lazy_static;
-extern crate librespot_core;
-extern crate librespot_playback;
-extern crate librespot_protocol;
-extern crate rspotify;
-extern crate tokio_core;
-extern crate tokio_timer;
-extern crate unicode_width;
-extern crate webbrowser;
-
 #[macro_use]
 extern crate serde;
-extern crate serde_json;
-extern crate toml;
-
-#[macro_use]
-extern crate log;
-extern crate chrono;
-extern crate fern;
-
-extern crate rand;
-extern crate url;
-
-extern crate strum;
-extern crate strum_macros;
-
-extern crate regex;
 
 use std::fs;
 use std::path::PathBuf;
@@ -42,11 +12,10 @@ use std::sync::Arc;
 
 use clap::{App, Arg};
 use cursive::traits::Identifiable;
-use std::ffi::CString;
-
 use librespot_core::authentication::Credentials;
 use librespot_core::cache::Cache;
 use librespot_playback::audio_backend;
+use log::{info, trace};
 
 mod album;
 mod artist;
@@ -126,10 +95,8 @@ struct UserDataInner {
     pub cmd: CommandManager,
 }
 
-fn main() {
-    let buf = CString::new("").unwrap();
-    unsafe { libc::setlocale(libc::LC_ALL, buf.as_ptr()) };
-
+#[tokio::main]
+async fn main() {
     let backends = {
         let backends: Vec<&str> = audio_backend::BACKENDS.iter().map(|b| b.0).collect();
         format!("Audio backends: {}", backends.join(", "))
@@ -173,7 +140,12 @@ fn main() {
     // otherwise the error message will not be seen by a user
     let cfg: Arc<crate::config::Config> = Arc::new(Config::new());
 
-    let cache = Cache::new(config::cache_path("librespot"), true);
+    let cache = Cache::new(
+        Some(config::cache_path("librespot")),
+        Some(config::cache_path("librespot").join("files")),
+        None,
+    )
+    .expect("Could not create librespot cache");
     let mut credentials = {
         let cached_credentials = cache.credentials();
         match cached_credentials {
@@ -186,10 +158,7 @@ fn main() {
     };
 
     while let Err(error) = spotify::Spotify::test_credentials(credentials.clone()) {
-        let error_msg = match error.get_ref() {
-            Some(inner) => inner.to_string(),
-            None => error.to_string(),
-        };
+        let error_msg = format!("{}", error);
         credentials = credentials_prompt(Some(error_msg));
     }
 
@@ -304,6 +273,10 @@ fn main() {
                     if let Some(data) = s.user_data::<UserData>().cloned() {
                         data.cmd.handle(s, parsed)
                     }
+                } else {
+                    let mut main = s.find_name::<ui::layout::Layout>("main").unwrap();
+                    let err_msg = format!("Unknown command: \"{}\"", c);
+                    main.set_result(Err(err_msg));
                 }
             }
             ev.trigger();

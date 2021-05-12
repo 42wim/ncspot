@@ -1,3 +1,4 @@
+use log::info;
 use std::cmp::{max, min, Ordering};
 use std::sync::{Arc, RwLock};
 
@@ -72,11 +73,6 @@ impl<I: ListItem> ListView<I> {
 
     fn can_paginate(&self) -> bool {
         if let Some(max) = self.get_pagination().max_content() {
-            trace!(
-                "pagination: total: {}, current: {}",
-                max,
-                self.last_content_len
-            );
             if max > self.last_content_len {
                 return true;
             }

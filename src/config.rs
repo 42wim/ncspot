@@ -4,6 +4,7 @@ use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::{fs, process};
 
 use cursive::theme::Theme;
+use log::{debug, error};
 use platform_dirs::AppDirs;
 
 use crate::command::{SortDirection, SortKey};
@@ -20,6 +21,7 @@ pub struct ConfigValues {
     pub theme: Option<ConfigTheme>,
     pub use_nerdfont: Option<bool>,
     pub audio_cache: Option<bool>,
+    pub audio_cache_size: Option<u32>,
     pub backend: Option<String>,
     pub backend_device: Option<String>,
     pub volnorm: Option<bool>,
